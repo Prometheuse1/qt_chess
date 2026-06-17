@@ -116,8 +116,8 @@ void ChessBoard::paintEvent(QPaintEvent *)
 
 void ChessBoard::drawBoard(QPainter &p)
 {
-    for (int r=0;r<8;r++){
-        for (int c= 0;c<8;c++){
+    for(int r=0;r<8;r++){
+        for(int c=0;c<8;c++){
             QColor light("#c8a97e");
             QColor dark("#6b3f1f");
             QColor fill=((r+c)%2==0)?light:dark;
@@ -129,18 +129,18 @@ void ChessBoard::drawBoard(QPainter &p)
 
 void ChessBoard::drawHighlight(QPainter &p)
 {
-    if (!m_selected) return;
-
+    if(!m_selected) return;
+    bool stillInCheck;
+    QPoint dl;
     QPoint tl=cellToPixel(m_selRow, m_selCol);
-    p.fillRect(tl.x(), tl.y(), CELL, CELL, QColor(255, 220, 50, 160));
+
+    p.fillRect(tl.x(),tl.y(),CELL,CELL,QColor(255,220,50,160));
     int couleur=(m_plateau.get_Tour()%2==0)?1:-1;
 
-    // Show legal destinations
-    p.setBrush(QColor(80, 200, 120, 255));
+    p.setBrush(QColor(80,200,120,255));
     p.setPen(Qt::NoPen);
-    for (int r = 0; r < 8; r++) {
-        for (int c = 0; c < 8; c++) {
-            // We use a const_cast trick: evaluation is logically const
+    for(int r=0;r<8;r++){
+        for(int c=0;c<8;c++){
             plateau &ref=const_cast<plateau&>(m_plateau);
             if(ref.evaluation(m_selRow,m_selCol,r,c)==1){
                 int saved=m_plateau.ech[r][c];
@@ -148,18 +148,18 @@ void ChessBoard::drawHighlight(QPainter &p)
                 m_plateau.ech[r][c]=piece;
                 m_plateau.ech[m_selRow][m_selCol]=0;
 
-                bool stillInCheck=(m_plateau.roi_en_echec(couleur)==1);
+                stillInCheck=(m_plateau.roi_en_echec(couleur)==1);
 
                 m_plateau.ech[m_selRow][m_selCol]=piece;
                 m_plateau.ech[r][c]=saved;
 
-                if (stillInCheck) continue;
+                if(stillInCheck) continue;
 
-                QPoint dl=cellToPixel(r,c);
+                dl=cellToPixel(r,c);
 
-                if (saved!=0)  // there's an enemy piece to capture
+                if(saved!=0)
                 {
-                    p.fillRect(dl.x(), dl.y(), CELL, CELL, QColor(200, 40, 40, 180));
+                    p.fillRect(dl.x(),dl.y(),CELL,CELL,QColor(200,40,40,180));
                 }
                 else
                 {
@@ -176,32 +176,31 @@ void ChessBoard::drawPieces(QPainter &p)
     QPoint tl;
     p.setFont(f);
 
-    for (int r = 0; r < 8; r++) {
-        for (int c = 0; c < 8; c++) {
-            int val = m_plateau.get_Piece(r, c);
-            if (val==0) continue;
+    for (int r=0; r<8;r++){
+        for (int c=0;c<8;c++){
+            int val=m_plateau.get_Piece(r,c);
+            if(val==0) continue;
 
             tl=cellToPixel(r,c);
             QRect cell(tl.x(),tl.y(),CELL,CELL);
 
-            // Shadow
             p.setPen(QColor(0,0,0,100));
             p.drawText(cell.adjusted(2,2,2,2),Qt::AlignCenter,pieceText(val));
 
-            // Piece
             p.setPen(pieceColor(val));
-            p.drawText(cell, Qt::AlignCenter, pieceText(val));
+            p.drawText(cell,Qt::AlignCenter,pieceText(val));
         }
     }
 }
 
 void ChessBoard::drawAxisLabels(QPainter &p)
 {
+    const char cols[]="abcdefgh";
+
     QFont f("Consolas",11,QFont::Bold);
     p.setFont(f);
     p.setPen(QColor(180,150,100));
 
-    const char cols[]="abcdefgh";
     for(int c=0;c<8;c++){
         int x=MARGIN+c*CELL+CELL/2-6;
         p.drawText(x,MARGIN-6,QString(cols[c]));
