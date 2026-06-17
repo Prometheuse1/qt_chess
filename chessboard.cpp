@@ -2,47 +2,43 @@
 #include <QTimer>
 #include <cmath>
 
-// ══════════════════════════════════════════════
-//  MenuDialog
-// ══════════════════════════════════════════════
-
-MenuDialog::MenuDialog(QWidget *parent) : QDialog(parent)
+MenuDialog::MenuDialog(QWidget *parent):QDialog(parent)
 {
     setWindowTitle("Jeu d'Échecs");
-    setFixedSize(460, 240);
-    setStyleSheet("background:#1a1a2e; color:#e0e0e0;");
+    setFixedSize(460,240);
+    setStyleSheet("background:#1a1a2e;color:#e0e0e0;");
 
-    auto *vl = new QVBoxLayout(this);
+    auto *vl=new QVBoxLayout(this);
     vl->setSpacing(16);
-    vl->setContentsMargins(30, 30, 30, 30);
+    vl->setContentsMargins(30,30,30,30);
 
-    auto *title = new QLabel("JEU D'ÉCHECS", this);
+    auto *title=new QLabel("JEU D'ÉCHECS",this);
     title->setAlignment(Qt::AlignCenter);
-    QFont tf("Georgia", 18, QFont::Bold);
+    QFont tf("Georgia",18,QFont::Bold);
     title->setFont(tf);
-    title->setStyleSheet("color:#f0c040; letter-spacing:2px;");
+    title->setStyleSheet("color:#f0c040;letter-spacing:2px;");
     vl->addWidget(title);
 
-    auto *sub = new QLabel("Choisissez un mode de jeu", this);
+    auto *sub=new QLabel("Choisissez un mode de jeu",this);
     sub->setAlignment(Qt::AlignCenter);
-    sub->setStyleSheet("color:#aaa; font-size:12px;");
+    sub->setStyleSheet("color:#aaa;font-size:12px;");
     vl->addWidget(sub);
 
-    auto *hl = new QHBoxLayout();
+    auto *hl=new QHBoxLayout();
 
     auto btnStyle=[](const QString &accent){
         return QString(
-            "QPushButton {"
-            "  background:%1;"
-            "  color:#fff;"
-            "  border:none;"
-            "  border-radius:6px;"
-            "  padding:10px 20px;"
-            "  font-size:13px;"
-            "  font-weight:bold;"
-            "}"
-            "QPushButton:hover { background:%1; opacity:0.85; }"
-        ).arg(accent);
+                   "QPushButton {"
+                   "  background:%1;"
+                   "  color:#fff;"
+                   "  border:none;"
+                   "  border-radius:6px;"
+                   "  padding:10px 20px;"
+                   "  font-size:13px;"
+                   "  font-weight:bold;"
+                   "}"
+                   "QPushButton:hover { background:%1; opacity:0.85; }"
+                   ).arg(accent);
     };
 
     auto *btn1=new QPushButton("Joueur vs Joueur",this);
@@ -54,47 +50,37 @@ MenuDialog::MenuDialog(QWidget *parent) : QDialog(parent)
     hl->addWidget(btn2);
     vl->addLayout(hl);
 
-    connect(btn1, &QPushButton::clicked, this, [this]{ m_choix=1; accept(); });
-    connect(btn2, &QPushButton::clicked, this, [this]{ m_choix=2; accept(); });
+    connect(btn1, &QPushButton::clicked,this,[this]{m_choix=1;accept();});
+    connect(btn2, &QPushButton::clicked,this,[this]{m_choix=2;accept();});
 }
 
-// ══════════════════════════════════════════════
-//  ChessBoard
-// ══════════════════════════════════════════════
-
-ChessBoard::ChessBoard(int gameMode, QWidget *parent)
+ChessBoard::ChessBoard(int gameMode,QWidget *parent)
     : QWidget(parent),
-      m_mode(gameMode),
-      m_selected(false),
-      m_selRow(-1), m_selCol(-1),
-      m_gameOver(false)
+    m_mode(gameMode),
+    m_selected(false),
+    m_selRow(-1),m_selCol(-1),
+    m_gameOver(false)
 {
     setFixedSize(MARGIN+CELL*8+MARGIN,MARGIN+CELL*8+MARGIN+50);
     setWindowTitle("Jeu d'Échecs");
     setStyleSheet("background:#1a1a2e;");
-
-    // Determine first turn message
-    m_statusMsg = "Tour des Blancs";
+    m_statusMsg="Tour des Blancs";
 }
 
-// ── geometry ─────────────────────────────────
-
-QPoint ChessBoard::cellToPixel(int row, int col) const
+QPoint ChessBoard::cellToPixel(int row,int col)const
 {
     return {MARGIN+col*CELL,MARGIN+row*CELL};
 }
 
-void ChessBoard::pixelToCell(QPoint pt, int &row, int &col) const
+void ChessBoard::pixelToCell(QPoint pt,int &row,int &col)const
 {
     col=(pt.x()-MARGIN)/CELL;
     row=(pt.y()-MARGIN)/CELL;
 }
 
-// ── piece rendering ───────────────────────────
-
 QString ChessBoard::pieceText(int val) const
 {
-    switch (val){
+    switch(val){
         case  1: return "♙";
         case  2: return "♖";
         case  3: return "♘";
@@ -111,12 +97,10 @@ QString ChessBoard::pieceText(int val) const
     }
 }
 
-QColor ChessBoard::pieceColor(int val) const
+QColor ChessBoard::pieceColor(int val)const
 {
-    return (val>0)?QColor(255, 255, 240):QColor(30, 30, 30);
+    return (val>0)?QColor(255,255,240):QColor(30,30,30);
 }
-
-// ── paint event ───────────────────────────────
 
 void ChessBoard::paintEvent(QPaintEvent *)
 {
@@ -132,8 +116,8 @@ void ChessBoard::paintEvent(QPaintEvent *)
 
 void ChessBoard::drawBoard(QPainter &p)
 {
-    for (int r = 0; r < 8; r++) {
-        for (int c = 0; c < 8; c++) {
+    for (int r=0;r<8;r++){
+        for (int c= 0;c<8;c++){
             QColor light("#c8a97e");
             QColor dark("#6b3f1f");
             QColor fill=((r+c)%2==0)?light:dark;
@@ -239,40 +223,34 @@ void ChessBoard::drawStatus(QPainter &p)
     p.drawText(QRect(0,y,width(),36),Qt::AlignCenter,m_statusMsg);
 }
 
-// ── mouse interaction ─────────────────────────
-
 void ChessBoard::mousePressEvent(QMouseEvent *event)
 {
+    int row,col,piece;
     if(m_gameOver) return;
-    // In IA mode, ignore clicks on black's turn
     if(m_mode==2 && m_plateau.get_Tour()%2!=0) return;
 
-    int row,col;
-    pixelToCell(event->pos(),row,col);
-    if (row<0 || row>7 || col<0 || col>7) return;
 
-    int piece=m_plateau.get_Piece(row, col);
+    pixelToCell(event->pos(),row,col);
+    if(row<0 || row>7 || col<0 || col>7) return;
+
+    piece=m_plateau.get_Piece(row, col);
 
     if(!m_selected){
-        // Select a piece belonging to the current player
         if(piece==0) return;
         if(m_plateau.get_Tour()%2==0 && piece<0) return;
         if(m_plateau.get_Tour()%2==1 && piece>0) return;
-
         m_selected=true;
         m_selRow=row;
         m_selCol=col;
     }
+
     else{
-        // Try to move
         if(row==m_selRow && col==m_selCol){
-            // Deselect
             m_selected=false;
             update();
             return;
         }
 
-        // If clicking another own piece, reselect
         if(piece!=0){
             bool sameColor=(m_plateau.get_Tour()%2==0 && piece>0) || (m_plateau.get_Tour()%2==1 && piece<0);
             if(sameColor){
@@ -287,20 +265,14 @@ void ChessBoard::mousePressEvent(QMouseEvent *event)
         m_selected=false;
         afterMove();
     }
-
     update();
 }
 
-// ── post-move logic ───────────────────────────
-
 void ChessBoard::afterMove()
 {
-    // fin_Partie prints to stdout and returns 1 on mate/stalemate
-    // We also check echec here to update status bar
     checkFinPartie();
 
     if(!m_gameOver && m_mode==2 && m_plateau.get_Tour()%2!=0){
-        // IA plays after a short delay so the board redraws first
         m_statusMsg="L'IA réfléchit…";
         update();
         QTimer::singleShot(1000,this,[this](){
@@ -313,10 +285,7 @@ void ChessBoard::afterMove()
 
 void ChessBoard::checkFinPartie()
 {
-    // fin_Partie already prints to stdout; we mirror messages in the GUI
-
     int couleur=(m_plateau.get_Tour()%2==0)?1:-1;
-
     bool enEchec=(m_plateau.roi_en_echec(couleur)==1);
     bool aLegal=(m_plateau.a_mouvement_legal(couleur)==1);
 
@@ -329,12 +298,12 @@ void ChessBoard::checkFinPartie()
         msg.setWindowTitle("Fin de partie");
         msg.setText(QString("Échec et mat!\nLes %1 gagnent!").arg(winner));
         msg.setStyleSheet(
-            "QMessageBox { background:#1a1a2e; }"
-            "QLabel      { color:white; font-size:16px; font-family:Georgia; }"
-            "QPushButton { background:#3a7bd5; color:white; border-radius:4px;"
-            "padding:6px 20px; font-size:13px; }"
+            "QMessageBox {background:#1a1a2e;}"
+            "QLabel      {color:white; font-size:16px; font-family:Georgia;}"
+            "QPushButton {background:#3a7bd5; color:white; border-radius:4px;"
+            "padding:6px 20px; font-size:13px;}"
             );
-        msg.setFixedSize(600, 300);
+        msg.setFixedSize(600,300);
         msg.exec();
         return;
     }
@@ -347,10 +316,10 @@ void ChessBoard::checkFinPartie()
         msg.setWindowTitle("Fin de partie");
         msg.setText("Pat! Match nul!");
         msg.setStyleSheet(
-            "QMessageBox { background:#1a1a2e; }"
-            "QLabel      { color:white; font-size:16px; font-family:Georgia; }"
-            "QPushButton { background:#3a7bd5; color:white; border-radius:4px;"
-            "padding:6px 20px; font-size:13px; }"
+            "QMessageBox {background:#1a1a2e;}"
+            "QLabel      {color:white; font-size:16px; font-family:Georgia;}"
+            "QPushButton {background:#3a7bd5; color:white; border-radius:4px;"
+            "padding:6px 20px;font-size:13px;}"
             );
         msg.setFixedSize(600, 300);
         msg.exec();
